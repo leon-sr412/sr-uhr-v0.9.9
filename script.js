@@ -1,111 +1,124 @@
-let upTime = 0;
-let downTime = 2700;
-let addedTime = 0;
+let matchTime = 45;
+let currentSeconds = 0;
 let interval;
-let isRunning = false;
-let isInBreak = false;
-let breakInterval;
-let breakSeconds = 900; // 15 Minuten
+let halftimeBreakTime = 900;
+let halftimeInterval;
+let inHalftimeBreak = false;
 
-const timerUpEl = document.getElementById("timerUp");
-const timerDownEl = document.getElementById("timerDown");
-const addedTimeEl = document.getElementById("addedTime");
-const matchSelect = document.getElementById("matchTime");
+const timerUp = document.getElementById("timerUp");
+const timerDown = document.getElementById("timerDown");
+const addedTime = document.getElementById("addedTime");
+const halftimeBreak = document.getElementById("halftimeBreak");
 
-function format(sec) {
-  const m = Math.floor(sec / 60).toString().padStart(2, "0");
-  const s = (sec % 60).toString().padStart(2, "0");
+function startTimer() {
+  if (inHalftimeBreak) return;
+  clearInterval(interval);
+  interval = setInterval(updateTimer, 1000);
+}
+
+function pauseAll() {
+  clearInterval(interval);
+}
+
+function resetTimer() {
+  clearInterval(interval);
+  currentSeconds = 0;
+  updateDisplay();
+  addedTime.textContent = "+00:00";
+}
+
+function updateTimer() {
+  currentSeconds++;
+  updateDisplay();
+}
+
+function updateDisplay() {
+  const ageGroup = document.getElementById("ageGroup").value;
+  const durations = { A: 45, B: 40, C: 35, test: 1 };
+  matchTime = durations[ageGroup];
+  const maxTime = matchTime * 2 * 60;
+
+  const upTime = currentSeconds;
+  const downTime = Math.max(0, maxTime - upTime);
+  timerUp.textContent = secondsToTime(upTime);
+  timerDown.textContent = secondsToTime(downTime);
+
+  if (upTime >= maxTime) {
+    addedTime.textContent = "+" + secondsToTime(upTime - maxTime);
+  } else {
+    addedTime.textContent = "+00:00";
+  }
+}
+
+function startHalftimeBreak() {
+  inHalftimeBreak = true;
+  pauseAll();
+  halftimeBreak.style.display = "block";
+  addedTime.style.display = "none";
+  let remaining = halftimeBreakTime;
+  halftimeBreak.textContent = secondsToTime(remaining);
+  clearInterval(halftimeInterval);
+  halftimeInterval = setInterval(() => {
+    remaining--;
+    halftimeBreak.textContent = secondsToTime(remaining);
+    if (remaining <= 0) {
+      clearInterval(halftimeInterval);
+      halftimeBreak.style.display = "none";
+      addedTime.style.display = "block";
+      inHalftimeBreak = false;
+    }
+  }, 1000);
+}
+
+function cancelHalftimeBreak() {
+  clearInterval(halftimeInterval);
+  halftimeBreak.style.display = "none";
+  addedTime.style.display = "block";
+  inHalftimeBreak = false;
+}
+
+function secondsToTime(secs) {
+  const m = String(Math.floor(secs / 60)).padStart(2, '0');
+  const s = String(secs % 60).padStart(2, '0');
   return `${m}:${s}`;
 }
 
 function updateClock() {
   const now = new Date();
-  document.getElementById("clock").textContent = now.toLocaleTimeString();
+  const h = String(now.getHours()).padStart(2, "0");
+  const m = String(now.getMinutes()).padStart(2, "0");
+  const s = String(now.getSeconds()).padStart(2, "0");
+  document.getElementById("clock").textContent = `${h}:${m}:${s}`;
 }
+
 setInterval(updateClock, 1000);
-
-function updateDisplay() {
-  timerUpEl.textContent = format(upTime);
-  timerDownEl.textContent = format(Math.max(0, downTime));
-  addedTimeEl.textContent = `+${format(addedTime)}`;
-}
-
-function tick() {
-  upTime++;
-  if (downTime > 0) {
-    downTime--;
-  } else {
-    addedTime++;
-  }
-  updateDisplay();
-}
-
-document.getElementById("start").onclick = () => {
-  if (!isRunning && !isInBreak) {
-    interval = setInterval(tick, 1000);
-    isRunning = true;
-  }
-};
-
-document.getElementById("pause").onclick = () => {
-  clearInterval(interval);
-  isRunning = false;
-};
-
-document.getElementById("reset").onclick = () => {
-  clearInterval(interval);
-  clearInterval(breakInterval);
-  isRunning = false;
-  isInBreak = false;
-  addedTime = 0;
-  upTime = 0;
-  downTime = parseInt(matchSelect.value);
-  document.getElementById("abortBreak").style.display = "none";
-  document.getElementById("timerUp").style.display = "block";
-  document.getElementById("timerDown").style.display = "block";
-  addedTimeEl.style.display = "block";
-  updateDisplay();
-};
-
-document.getElementById("break").onclick = () => {
-  if (!isInBreak) {
-    clearInterval(interval);
-    isRunning = false;
-    isInBreak = true;
-    document.getElementById("timerUp").style.display = "none";
-    document.getElementById("timerDown").style.display = "none";
-    addedTimeEl.style.display = "none";
-    document.getElementById("abortBreak").style.display = "inline-block";
-
-    breakSeconds = 900;
-    breakInterval = setInterval(() => {
-      breakSeconds--;
-      addedTimeEl.textContent = `Halbzeitpause: ${format(breakSeconds)}`;
-      addedTimeEl.style.display = "block";
-      if (breakSeconds <= 0) {
-        document.getElementById("abortBreak").click();
-      }
-    }, 1000);
-  }
-};
-
-document.getElementById("abortBreak").onclick = () => {
-  clearInterval(breakInterval);
-  isInBreak = false;
-  document.getElementById("abortBreak").style.display = "none";
-  document.getElementById("timerUp").style.display = "block";
-  document.getElementById("timerDown").style.display = "block";
-  addedTimeEl.style.display = "block";
-  addedTimeEl.textContent = "+00:00";
-};
-
-matchSelect.onchange = () => {
-  downTime = parseInt(matchSelect.value);
-  upTime = 0;
-  addedTime = 0;
-  updateDisplay();
-};
-
-// Initiale Anzeige
 updateClock();
-updateDisplay();
+
+document.getElementById("language").addEventListener("change", () => {
+  const lang = document.getElementById("language").value;
+  const texts = {
+    de: {
+      title: "Schiedsrichter Uhr",
+      half1: "1HZ",
+      half2: "2HZ",
+      up: "Ges. Zeit",
+      down: "Verbleibend",
+      added: "Nachspielzeit",
+    },
+    en: {
+      title: "Referee Timer",
+      half1: "1st HT",
+      half2: "2nd HT",
+      up: "Elapsed",
+      down: "Remaining",
+      added: "Added Time",
+    }
+  };
+  const t = texts[lang];
+  document.getElementById("title").textContent = t.title;
+  document.getElementById("half").options[0].text = t.half1;
+  document.getElementById("half").options[1].text = t.half2;
+  document.getElementById("upLabel").textContent = t.up;
+  document.getElementById("downLabel").textContent = t.down;
+  document.getElementById("addedLabel").textContent = t.added;
+});
