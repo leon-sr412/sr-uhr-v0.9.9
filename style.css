@@ -79,3 +79,13 @@ select {
   color: white;
   cursor: pointer;
 }
+
+.footer-copyright {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  color: #ccc;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  z-index: 100;
+}
