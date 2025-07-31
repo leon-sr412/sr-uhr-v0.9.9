@@ -4,59 +4,289 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Schiedsrichter Uhr</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 90vmin;
+      max-width: 500px;
+      background-color: #1e1e1e;
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2em;
+      user-select: none;
+    }
+
+    select {
+      font-size: 1em;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: none;
+      background-color: #2c2c2c;
+      color: white;
+      margin: 0 4px;
+    }
+
+    #clock {
+      font-size: 1.2em;
+      margin-top: 6px;
+    }
+
+    .timers {
+      text-align: center;
+    }
+
+    .timer {
+      font-size: 2.8em;
+      font-weight: bold;
+      margin: 6px 0;
+    }
+
+    .half-time {
+      font-size: 2em;
+      color: #ffa726;
+      display: none;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .controls button {
+      font-size: 1.6em;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background-color: #555;
+    }
+
+    .copyright {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #aaa;
+      align-self: flex-start;
+      margin-left: 12px;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        width: 95%;
+        padding: 12px;
+      }
+
+      .timer {
+        font-size: 2.2em;
+      }
+
+      .controls button {
+        font-size: 1.3em;
+        padding: 8px 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <div class="top-row">
-      <h1 id="title">Schiedsrichter Uhr</h1>
-      <div>
-        <select id="language">
-          <option value="de">DE</option>
-          <option value="en">US</option>
-        </select>
-        <select id="ageGroup">
-          <option value="A">2x45</option>
-          <option value="B">2x40</option>
-          <option value="C">2x35</option>
-          <option value="test">2x1</option>
-        </select>
-        <select id="half">
-          <option value="1">1HZ</option>
-          <option value="2">2HZ</option>
-        </select>
-      </div>
-      <div id="clock">--:--:--</div>
+    <h1 id="title">Schiedsrichter Uhr</h1>
+
+    <div>
+      <select id="language">
+        <option value="de">DE</option>
+        <option value="en">US</option>
+      </select>
+      <select id="ageGroup">
+        <option value="A">2x45</option>
+        <option value="B">2x40</option>
+        <option value="C">2x35</option>
+        <option value="test">2x1</option>
+      </select>
+      <select id="half">
+        <option value="1">1HZ</option>
+        <option value="2">2HZ</option>
+      </select>
+    </div>
+
+    <div id="clock">--:--:--</div>
+
+    <div class="timers">
+      <div><small id="upLabel">Ges. Zeit</small></div>
+      <div id="timerUp" class="timer">00:00</div>
+      <div><small id="downLabel">Verbleibend</small></div>
+      <div id="timerDown" class="timer">00:00</div>
+      <div><small id="addedLabel">Nachspielzeit</small></div>
+      <div id="addedTime" class="timer">+00:00</div>
+      <div id="halftimeBreak" class="half-time">15:00</div>
     </div>
 
     <div class="controls">
-      <div class="button-column">
-        <button onclick="startTimer()">▶️</button>
-        <button onclick="pauseAll()">⏸️</button>
-        <button onclick="resetTimer()">🔁</button>
-      </div>
-
-      <div class="timers">
-        <div><small id="upLabel">Ges. Zeit</small></div>
-        <div id="timerUp" class="timer">00:00</div>
-        <div><small id="downLabel">Verbleibend</small></div>
-        <div id="timerDown" class="timer">00:00</div>
-        <div><small id="addedLabel">Nachspielzeit</small></div>
-        <div id="addedTime" class="timer">+00:00</div>
-        <div id="halftimeBreak" class="half-time" style="display:none;">15:00</div>
-      </div>
-
-      <div class="button-column">
-        <button onclick="startHalftimeBreak()">⏳</button>
-        <button onclick="cancelHalftimeBreak()">❌</button>
-      </div>
+      <button onclick="startTimer()">▶️</button>
+      <button onclick="pauseAll()">⏸️</button>
+      <button onclick="resetTimer()">🔁</button>
+      <button onclick="startHalftimeBreak()">⏳</button>
+      <button onclick="cancelHalftimeBreak()">❌</button>
     </div>
+
+    <div class="copyright">© Leon Cordes</div>
   </div>
 
-  <footer class="footer-copyright">
-    &copy; Leon Cordes
-  </footer>
+  <script>
+    let matchTime = 45;
+    let currentSeconds = 0;
+    let interval;
+    let halftimeBreakTime = 900;
+    let halftimeInterval;
+    let inHalftimeBreak = false;
 
-  <script src="script.js"></script>
+    const timerUp = document.getElementById("timerUp");
+    const timerDown = document.getElementById("timerDown");
+    const addedTime = document.getElementById("addedTime");
+    const halftimeBreak = document.getElementById("halftimeBreak");
+
+    function startTimer() {
+      if (inHalftimeBreak) return;
+      clearInterval(interval);
+      interval = setInterval(updateTimer, 1000);
+    }
+
+    function pauseAll() {
+      clearInterval(interval);
+    }
+
+    function resetTimer() {
+      clearInterval(interval);
+      currentSeconds = 0;
+      updateDisplay();
+      addedTime.textContent = "+00:00";
+    }
+
+    function updateTimer() {
+      currentSeconds++;
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      const ageGroup = document.getElementById("ageGroup").value;
+      const half = parseInt(document.getElementById("half").value);
+      const durations = { A: 45, B: 40, C: 35, test: 1 };
+      matchTime = durations[ageGroup];
+      const baseTime = half === 1 ? 0 : matchTime * 60;
+      const maxTime = matchTime * half * 60;
+
+      const upTime = baseTime + currentSeconds;
+      const downTime = Math.max(0, maxTime - upTime);
+      timerUp.textContent = secondsToTime(upTime);
+      timerDown.textContent = secondsToTime(downTime);
+
+      if (upTime >= maxTime) {
+        addedTime.textContent = "+" + secondsToTime(upTime - maxTime);
+      } else {
+        addedTime.textContent = "+00:00";
+      }
+    }
+
+    function startHalftimeBreak() {
+      inHalftimeBreak = true;
+      pauseAll();
+      halftimeBreak.style.display = "block";
+      addedTime.style.display = "none";
+      let remaining = halftimeBreakTime;
+      halftimeBreak.textContent = secondsToTime(remaining);
+      clearInterval(halftimeInterval);
+      halftimeInterval = setInterval(() => {
+        remaining--;
+        halftimeBreak.textContent = secondsToTime(remaining);
+        if (remaining <= 0) {
+          clearInterval(halftimeInterval);
+          halftimeBreak.style.display = "none";
+          addedTime.style.display = "block";
+          inHalftimeBreak = false;
+        }
+      }, 1000);
+    }
+
+    function cancelHalftimeBreak() {
+      clearInterval(halftimeInterval);
+      halftimeBreak.style.display = "none";
+      addedTime.style.display = "block";
+      inHalftimeBreak = false;
+    }
+
+    function secondsToTime(secs) {
+      const m = String(Math.floor(secs / 60)).padStart(2, '0');
+      const s = String(secs % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+      document.getElementById("clock").textContent = `${h}:${m}:${s}`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    document.getElementById("language").addEventListener("change", () => {
+      const lang = document.getElementById("language").value;
+      const texts = {
+        de: {
+          title: "Schiedsrichter Uhr",
+          half1: "1HZ",
+          half2: "2HZ",
+          up: "Ges. Zeit",
+          down: "Verbleibend",
+          added: "Nachspielzeit",
+        },
+        en: {
+          title: "Referee Timer",
+          half1: "1st HT",
+          half2: "2nd HT",
+          up: "Elapsed",
+          down: "Remaining",
+          added: "Added Time",
+        }
+      };
+      const t = texts[lang];
+      document.getElementById("title").textContent = t.title;
+      document.getElementById("half").options[0].text = t.half1;
+      document.getElementById("half").options[1].text = t.half2;
+      document.getElementById("upLabel").textContent = t.up;
+      document.getElementById("downLabel").textContent = t.down;
+      document.getElementById("addedLabel").textContent = t.added;
+    });
+  </script>
 </body>
 </html>
