@@ -1,46 +1,62 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Schiedsrichter Uhr</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Schiedsrichter Uhr</h1>
-    <div id="clock">--:--:--</div>
-
-    <select id="matchTime">
-      <option value="30">Testmodus (0:30)</option>
-      <option value="2700">2×45 Minuten</option>
-      <option value="2400">2×40 Minuten</option>
-      <option value="2100">2×35 Minuten</option>
-      <option value="1800">2×30 Minuten</option>
-    </select>
-
-    <div class="timers">
-      <div class="timer green" id="timerUp">00:00</div>
-      <div class="label">Spielzeit hoch</div>
-      <div class="timer red" id="timerDown">45:00</div>
-      <div class="label">Spielzeit runter</div>
-      <div id="addedTime">+00:00</div>
+    <div class="top-row">
+      <h1 id="title">Schiedsrichter Uhr</h1>
+      <div>
+        <select id="language">
+          <option value="de">DE</option>
+          <option value="en">US</option>
+        </select>
+        <select id="ageGroup">
+          <option value="A">2x45</option>
+          <option value="B">2x40</option>
+          <option value="C">2x35</option>
+          <option value="test">2x1</option>
+        </select>
+        <select id="half">
+          <option value="1">1HZ</option>
+          <option value="2">2HZ</option>
+        </select>
+      </div>
+      <div id="clock">--:--:--</div>
     </div>
 
-    <div class="buttons">
-      <button id="start">▶️</button>
-      <button id="pause">⏸️</button>
-      <button id="reset">🔄</button>
-      <button id="break">⏳</button>
-      <button id="abortBreak" style="display:none;">🛑</button>
+    <div class="controls">
+      <div class="button-column">
+        <button onclick="startTimer()">▶️</button>
+        <button onclick="pauseAll()">⏸️</button>
+        <button onclick="resetTimer()">🔁</button>
+      </div>
+
+      <div class="timers">
+        <div><small id="upLabel">Ges. Zeit</small></div>
+        <div id="timerUp" class="timer">00:00</div>
+        <div><small id="downLabel">Verbleibend</small></div>
+        <div id="timerDown" class="timer">00:00</div>
+        <div><small id="addedLabel">Nachspielzeit</small></div>
+        <div id="addedTime" class="timer">+00:00</div>
+        <div id="halftimeBreak" class="half-time" style="display:none;">15:00</div>
+      </div>
+
+      <div class="button-column">
+        <button onclick="startHalftimeBreak()">⏳</button>
+        <button onclick="cancelHalftimeBreak()">❌</button>
+      </div>
     </div>
   </div>
+
+  <footer class="footer-copyright">
+    &copy; Leon Cordes
+  </footer>
 
   <script src="script.js"></script>
 </body>
 </html>
-
-<footer class="footer-copyright">
-  &copy; Leon Cordes
-</footer>
-
