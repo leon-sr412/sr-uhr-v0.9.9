@@ -1,91 +1,124 @@
-* {
-  box-sizing: border-box;
+let matchTime = 45;
+let currentSeconds = 0;
+let interval;
+let halftimeBreakTime = 900;
+let halftimeInterval;
+let inHalftimeBreak = false;
+
+const timerUp = document.getElementById("timerUp");
+const timerDown = document.getElementById("timerDown");
+const addedTime = document.getElementById("addedTime");
+const halftimeBreak = document.getElementById("halftimeBreak");
+
+function startTimer() {
+  if (inHalftimeBreak) return;
+  clearInterval(interval);
+  interval = setInterval(updateTimer, 1000);
 }
 
-body {
-  margin: 0;
-  font-family: sans-serif;
-  background-color: #121212;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+function pauseAll() {
+  clearInterval(interval);
 }
 
-.container {
-  text-align: center;
-  width: 90%;
-  max-width: 400px;
-  background: #1f1f1f;
-  border-radius: 12px;
-  padding: 20px;
+function resetTimer() {
+  clearInterval(interval);
+  currentSeconds = 0;
+  updateDisplay();
+  addedTime.textContent = "+00:00";
 }
 
-h1 {
-  margin-bottom: 10px;
+function updateTimer() {
+  currentSeconds++;
+  updateDisplay();
 }
 
-#clock {
-  font-size: 1.2em;
-  margin-bottom: 10px;
+function updateDisplay() {
+  const ageGroup = document.getElementById("ageGroup").value;
+  const durations = { A: 45, B: 40, C: 35, test: 1 };
+  matchTime = durations[ageGroup];
+  const maxTime = matchTime * 2 * 60;
+
+  const upTime = currentSeconds;
+  const downTime = Math.max(0, maxTime - upTime);
+  timerUp.textContent = secondsToTime(upTime);
+  timerDown.textContent = secondsToTime(downTime);
+
+  if (upTime >= maxTime) {
+    addedTime.textContent = "+" + secondsToTime(upTime - maxTime);
+  } else {
+    addedTime.textContent = "+00:00";
+  }
 }
 
-select {
-  padding: 8px;
-  margin-bottom: 15px;
-  border-radius: 6px;
-  border: none;
-  background-color: #333;
-  color: white;
+function startHalftimeBreak() {
+  inHalftimeBreak = true;
+  pauseAll();
+  halftimeBreak.style.display = "block";
+  addedTime.style.display = "none";
+  let remaining = halftimeBreakTime;
+  halftimeBreak.textContent = secondsToTime(remaining);
+  clearInterval(halftimeInterval);
+  halftimeInterval = setInterval(() => {
+    remaining--;
+    halftimeBreak.textContent = secondsToTime(remaining);
+    if (remaining <= 0) {
+      clearInterval(halftimeInterval);
+      halftimeBreak.style.display = "none";
+      addedTime.style.display = "block";
+      inHalftimeBreak = false;
+    }
+  }, 1000);
 }
 
-.timers {
-  margin-bottom: 20px;
+function cancelHalftimeBreak() {
+  clearInterval(halftimeInterval);
+  halftimeBreak.style.display = "none";
+  addedTime.style.display = "block";
+  inHalftimeBreak = false;
 }
 
-.timer {
-  font-size: 2.5em;
-  font-weight: bold;
+function secondsToTime(secs) {
+  const m = String(Math.floor(secs / 60)).padStart(2, '0');
+  const s = String(secs % 60).padStart(2, '0');
+  return `${m}:${s}`;
 }
 
-.label {
-  font-size: 0.9em;
-  color: #ccc;
-  margin-bottom: 5px;
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, "0");
+  const m = String(now.getMinutes()).padStart(2, "0");
+  const s = String(now.getSeconds()).padStart(2, "0");
+  document.getElementById("clock").textContent = `${h}:${m}:${s}`;
 }
 
-.green {
-  color: lightgreen;
-}
+setInterval(updateClock, 1000);
+updateClock();
 
-.red {
-  color: #ff6b6b;
-}
-
-#addedTime {
-  color: yellow;
-  font-size: 1.4em;
-  margin-top: 10px;
-}
-
-.buttons button {
-  font-size: 1.5em;
-  margin: 5px;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 10px;
-  background-color: #333;
-  color: white;
-  cursor: pointer;
-}
-
-.footer-copyright {
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  color: #ccc;
-  font-size: 14px;
-  font-family: Arial, sans-serif;
-  z-index: 100;
-}
+document.getElementById("language").addEventListener("change", () => {
+  const lang = document.getElementById("language").value;
+  const texts = {
+    de: {
+      title: "Schiedsrichter Uhr",
+      half1: "1HZ",
+      half2: "2HZ",
+      up: "Ges. Zeit",
+      down: "Verbleibend",
+      added: "Nachspielzeit",
+    },
+    en: {
+      title: "Referee Timer",
+      half1: "1st HT",
+      half2: "2nd HT",
+      up: "Elapsed",
+      down: "Remaining",
+      added: "Added Time",
+    }
+  };
+  const t = texts[lang];
+  document.getElementById("title").textContent = t.title;
+  document.getElementById("half").options[0].text = t.half1;
+  document.getElementById("half").options[1].text = t.half2;
+  document.getElementById("upLabel").textContent = t.up;
+  document.getElementById("downLabel").textContent = t.down;
+  document.getElementById("addedLabel").textContent = t.added;
+});
